@@ -223,6 +223,7 @@ function App() {
       </div>
       <Table
         dataSource={todoList}
+        className="table"
         columns={columns}
         pagination={{ pageSize: 5 }}
         style={{ width: 800, margin: "0 auto" }}
