@@ -32,6 +32,7 @@ function App() {
           : Number(todoList[todoList.length - 1].serial) + 1,
       [name]: value,
       date: new Date().toLocaleTimeString(),
+      status: "OPEN",
     }));
   }
 
@@ -59,9 +60,9 @@ function App() {
 
   function handleEdit(record) {
     // to open modal of edit button
-    console.log(record.title);
+    console.log(record);
     setIsEditModal(true);
-    setEditing(record.title);
+    setEditing(record);
   }
 
   const columns = [
@@ -69,6 +70,7 @@ function App() {
       title: "Serial No.",
       dataIndex: "serial",
       key: "id",
+      sorter: (a, b) => a.serial - b.serial,
     },
     {
       title: "Title",
@@ -77,11 +79,13 @@ function App() {
       render: (title) => {
         return <a>{title}</a>;
       },
+      sorter: (a, b) => a.title - b.title,
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "id",
+      sorter: (a, b) => a.description - b.description,
     },
     {
       title: "Date Created",
@@ -90,12 +94,24 @@ function App() {
       sorter: (a, b) => a.date - b.date,
     },
     {
+      title: "Due Date",
+      dataIndex: "due",
+      key: "id",
+      sorter: (a, b) => a.due - b.due,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "id",
+    },
+    {
       title: "Actions",
       key: "8116",
       render: (record) => {
         return (
           <>
             <EditOutlined
+              id={todoData.id}
               onClick={() => {
                 handleEdit(record);
               }}
@@ -119,8 +135,9 @@ function App() {
     setIsClearModal(false);
   }
 
-  function editTask() {
+  function editTask(e) {
     // modal button edit
+    setEditing((prev) => ({}));
     setIsEditModal(false);
   }
 
@@ -131,6 +148,7 @@ function App() {
         <input
           type="text"
           placeholder="Title"
+          maxLength="100"
           className="title_input"
           name="title"
           ref={titleRef}
@@ -140,12 +158,28 @@ function App() {
         <input
           type="text"
           placeholder="Description"
+          maxLength="100"
           className="desc_input"
           name="description"
           ref={descRef}
           value={todoData.description}
           onChange={handleTodoData}
         />
+        <label htmlFor="dueDate">Due Date:</label>
+        <input
+          type="date"
+          id="dueDate"
+          name="due"
+          value={todoData.due}
+          onChange={handleTodoData}
+        />
+        <label for="tag">Choose a tag:</label>
+        <select name="tag" id="tag" required>
+          <option value="open">Open</option>
+          <option value="working">Working</option>
+          <option value="done">Done</option>
+          <option value="overdue">Overdue</option>
+        </select>
         <div className="btn-container">
           <button className="btn add_btn" onClick={handleAddTodoList}>
             Add Task
@@ -172,7 +206,8 @@ function App() {
         onCancel={() => setIsEditModal(false)}
         onOk={() => editTask()}
       >
-        <Input value={editing} />
+        <Input name="title" value={editing.title} id={editing.id} />
+        <Input name="description" value={editing.description} id={editing.id} />
       </Modal>
     </div>
   );
