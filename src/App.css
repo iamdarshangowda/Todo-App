@@ -27,11 +27,23 @@
   border-radius: 10px;
 }
 
-.add_btn {
+.btn {
   width: 150px;
   height: 40px;
   border: none;
   border-radius: 6px;
-  background-color: aquamarine;
   margin-bottom: 10px;
+}
+
+.add_btn {
+  background-color: aquamarine;
+}
+
+.clear_btn {
+  background-color: orangered;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: space-evenly;
 }
