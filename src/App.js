@@ -11,6 +11,7 @@ function App() {
     title: "",
     description: "",
     date: new Date().toLocaleTimeString(),
+    due: "",
   };
 
   const [todoData, setTodoData] = useState(initialState); // data from input
@@ -55,12 +56,18 @@ function App() {
 
   function handleDelete(record) {
     // delete tasks on click delete button
-    setTodoList((prev) => prev.filter((item) => item.id !== record.id));
+    Modal.confirm({
+      title: "Are you sure want to delete this?",
+      okText: "Yes",
+      okType: "danger",
+      onOk: () => {
+        setTodoList((prev) => prev.filter((item) => item.id !== record.id));
+      },
+    });
   }
 
   function handleEdit(record) {
     // to open modal of edit button
-    console.log(record);
     setIsEditModal(true);
     setEditing(record);
   }
@@ -76,9 +83,6 @@ function App() {
       title: "Title",
       dataIndex: "title",
       key: "id",
-      render: (title) => {
-        return <a>{title}</a>;
-      },
       sorter: (a, b) => a.title - b.title,
     },
     {
@@ -106,7 +110,7 @@ function App() {
     },
     {
       title: "Actions",
-      key: "8116",
+      key: "id",
       render: (record) => {
         return (
           <>
@@ -137,49 +141,77 @@ function App() {
 
   function editTask(e) {
     // modal button edit
-    setEditing((prev) => ({}));
     setIsEditModal(false);
+    console.log(e.id);
+    setTodoList((prev) => {
+      return prev.map((item) => {
+        if (
+          (item.title.toLowerCase() !== e.title.toLowerCase() ||
+            item.description.toLowerCase() !== e.title.toLowerCase()) &&
+          item.id === e.id
+        ) {
+          return { ...item, ...editing };
+        } else {
+          return { ...item };
+        }
+      });
+    });
+  }
+
+  function handleEditChange(e) {
+    const { name, value } = e.target;
+    setEditing((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   return (
     <div>
-      <div className="input-container">
-        <h1>Todo App</h1>
-        <input
-          type="text"
-          placeholder="Title"
-          maxLength="100"
-          className="title_input"
-          name="title"
-          ref={titleRef}
-          value={todoData.title}
-          onChange={handleTodoData}
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          maxLength="100"
-          className="desc_input"
-          name="description"
-          ref={descRef}
-          value={todoData.description}
-          onChange={handleTodoData}
-        />
-        <label htmlFor="dueDate">Due Date:</label>
-        <input
-          type="date"
-          id="dueDate"
-          name="due"
-          value={todoData.due}
-          onChange={handleTodoData}
-        />
-        <label for="tag">Choose a tag:</label>
-        <select name="tag" id="tag" required>
-          <option value="open">Open</option>
-          <option value="working">Working</option>
-          <option value="done">Done</option>
-          <option value="overdue">Overdue</option>
-        </select>
+      <div className="top-container">
+        <div className="input-container">
+          <h1>Todo App</h1>
+          <p>Create new task:</p>
+          <input
+            type="text"
+            placeholder="Title"
+            maxLength="100"
+            className="title_input"
+            name="title"
+            ref={titleRef}
+            value={todoData.title}
+            onChange={handleTodoData}
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            maxLength="100"
+            className="desc_input"
+            name="description"
+            ref={descRef}
+            value={todoData.description}
+            onChange={handleTodoData}
+          />
+          <div className="picker_input">
+            <label htmlFor="dueDate">Due Date:</label>
+            <input
+              type="date"
+              id="dueDate"
+              className="due_input"
+              name="due"
+              min={new Date().toISOString().split("T")[0]}
+              value={todoData.due}
+              onChange={handleTodoData}
+            />
+            <label for="status">Status:</label>
+            <select name="status" id="status" className="status_input" required>
+              <option value="open">Open</option>
+              <option value="working">Working</option>
+              <option value="done">Done</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+        </div>
         <div className="btn-container">
           <button className="btn add_btn" onClick={handleAddTodoList}>
             Add Task
@@ -192,6 +224,7 @@ function App() {
       <Table
         dataSource={todoList}
         columns={columns}
+        pagination={{ pageSize: 5 }}
         style={{ width: 800, margin: "0 auto" }}
       ></Table>
       <Modal
@@ -203,11 +236,29 @@ function App() {
       <Modal
         title="Edit Task"
         visible={isEditModal}
+        id={editing.id}
         onCancel={() => setIsEditModal(false)}
-        onOk={() => editTask()}
+        onOk={() => editTask(editing)}
       >
-        <Input name="title" value={editing.title} id={editing.id} />
-        <Input name="description" value={editing.description} id={editing.id} />
+        <Input
+          type="text"
+          name="title"
+          value={editing.title}
+          onChange={handleEditChange}
+        />
+        <Input
+          type="text"
+          name="description"
+          value={editing.description}
+          onChange={handleEditChange}
+        />
+        <Input
+          type="date"
+          name="due"
+          min={new Date().toISOString().split("T")[0]}
+          value={editing.due}
+          onChange={handleEditChange}
+        />
       </Modal>
     </div>
   );
