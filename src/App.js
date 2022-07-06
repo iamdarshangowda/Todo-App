@@ -167,7 +167,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div className="App">
       <div className="top-container">
         <div className="input-container">
           <h1>Todo App</h1>

@@ -114,11 +114,14 @@ body {
 }
 
 @media only screen and (max-device-width: 480px) {
+  .App {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .top-container {
     flex-direction: column;
-    padding: 15px;
-  }
-  .input-container {
+    padding: 10px;
     width: 480px;
   }
   .btn-container {
