@@ -1,6 +1,6 @@
 import "./App.css";
 import "antd/dist/antd.css";
-import { Table, Modal, Input } from "antd";
+import { Table, Modal, Input, Button, Space } from "antd";
 import { useRef, useState } from "react";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -15,7 +15,9 @@ function App() {
   };
 
   const [todoData, setTodoData] = useState(initialState); // data from input
-  const [todoList, setTodoList] = useState([]); // stores all todo data to display in table
+  const [todoList, setTodoList] = useState(
+    JSON.parse(localStorage.getItem("todoList")) || []
+  ); // stores all todo data to display in table
   const [isClearModal, setIsClearModal] = useState(false); // to open and close Modal
   const [isEditModal, setIsEditModal] = useState(false); // to open and close Modal
   const [editing, setEditing] = useState(""); // contains single task to edit
@@ -31,9 +33,9 @@ function App() {
         todoList.length === 0
           ? 1
           : Number(todoList[todoList.length - 1].serial) + 1,
+      status: "Open",
       [name]: value,
       date: new Date().toLocaleTimeString(),
-      status: "OPEN",
     }));
   }
 
@@ -41,6 +43,7 @@ function App() {
     // to add tasks to table
     if (titleRef.current.value.length > 0 && descRef.current.value.length > 0) {
       setTodoList((prev) => {
+        localStorage.setItem("todoList", JSON.stringify([...prev, todoData]));
         return [...prev, todoData];
       });
       setTodoData(initialState);
@@ -83,30 +86,49 @@ function App() {
       title: "Title",
       dataIndex: "title",
       key: "id",
-      sorter: (a, b) => a.title - b.title,
+      sorter: (a, b) => a.title.localeCompare(b.title),
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "id",
-      sorter: (a, b) => a.description - b.description,
+      sorter: (a, b) => a.description.localeCompare(b.description),
     },
     {
-      title: "Date Created",
+      title: "Created Time",
       dataIndex: "date",
       key: "id",
-      sorter: (a, b) => a.date - b.date,
+      sorter: (a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0),
     },
     {
       title: "Due Date",
       dataIndex: "due",
       key: "id",
-      sorter: (a, b) => a.due - b.due,
+      sorter: (a, b) => new Date(a.due) - new Date(b.due),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "id",
+      filters: [
+        {
+          text: "Open",
+          value: "Open",
+        },
+        {
+          text: "Working",
+          value: "Working",
+        },
+        {
+          text: "Done",
+          value: "Done",
+        },
+        {
+          text: "Overdue",
+          value: "Overdue",
+        },
+      ],
+      onFilter: (value, record) => record.status.includes(value),
     },
     {
       title: "Actions",
@@ -136,6 +158,7 @@ function App() {
   function clearAllTasks() {
     // modal button clear all
     setTodoList([]);
+    localStorage.clear("todoList");
     setIsClearModal(false);
   }
 
@@ -162,6 +185,7 @@ function App() {
     const { name, value } = e.target;
     setEditing((prev) => ({
       ...prev,
+      status: "Open",
       [name]: value,
     }));
   }
@@ -204,11 +228,17 @@ function App() {
               onChange={handleTodoData}
             />
             <label for="status">Status:</label>
-            <select name="status" id="status" className="status_input" required>
-              <option value="open">Open</option>
-              <option value="working">Working</option>
-              <option value="done">Done</option>
-              <option value="overdue">Overdue</option>
+            <select
+              name="status"
+              id="status"
+              className="status_input"
+              value={todoData.status}
+              onChange={handleTodoData}
+            >
+              <option value="Open">Open</option>
+              <option value="Working">Working</option>
+              <option value="Done">Done</option>
+              <option value="Overdue">Overdue</option>
             </select>
           </div>
         </div>
@@ -229,7 +259,9 @@ function App() {
         style={{ width: 800, margin: "0 auto" }}
       ></Table>
       <Modal
-        title="Are you sure?"
+        title="Are you sure want to clear all?"
+        okType="danger"
+        okText="Yes"
         visible={isClearModal}
         onCancel={() => setIsClearModal(false)}
         onOk={() => clearAllTasks()}
@@ -260,6 +292,19 @@ function App() {
           value={editing.due}
           onChange={handleEditChange}
         />
+        <label for="status">Status:</label>
+        <select
+          name="status"
+          id="status"
+          className="status_input"
+          value={editing.status}
+          onChange={handleEditChange}
+        >
+          <option value="Open">Open</option>
+          <option value="Working">Working</option>
+          <option value="Done">Done</option>
+          <option value="Overdue">Overdue</option>
+        </select>
       </Modal>
     </div>
   );
