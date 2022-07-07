@@ -24,6 +24,7 @@ function App() {
   const titleRef = useRef(); // to check if title is empty
   const descRef = useRef(); // to check if description is empty
 
+  /* HANDLES AND FUNCTIONS START */
   function handleTodoData(e) {
     // update current todo data is state
     const { name, value } = e.target;
@@ -79,6 +80,61 @@ function App() {
     setEditing(record);
   }
 
+  function clearAllTasks() {
+    // modal button clear all
+    setTodoList([]);
+    localStorage.clear("todoList");
+    setIsClearModal(false);
+  }
+
+  function editTask(e) {
+    // modal button edit
+    setIsEditModal(false);
+    console.log(e.id);
+    setTodoList((prev) => {
+      return prev.map((item) => {
+        if (
+          (item.title.toLowerCase() !== e.title.toLowerCase() ||
+            item.description.toLowerCase() !== e.title.toLowerCase()) &&
+          item.id === e.id
+        ) {
+          return { ...item, ...editing };
+        } else {
+          return { ...item };
+        }
+      });
+    });
+
+    localStorage.setItem(
+      "todoList",
+      JSON.stringify(
+        todoList.map((item) => {
+          if (
+            (item.title.toLowerCase() !== e.title.toLowerCase() ||
+              item.description.toLowerCase() !== e.title.toLowerCase()) &&
+            item.id === e.id
+          ) {
+            return { ...item, ...editing };
+          } else {
+            return { ...item };
+          }
+        })
+      )
+    );
+  }
+
+  function handleEditChange(e) {
+    const { name, value } = e.target;
+    setEditing((prev) => ({
+      ...prev,
+      status: "Open",
+      [name]: value,
+    }));
+  }
+
+  /* HANDLES AND FUNCTIONS END */
+
+  /* TABLE COLUMNS START */
   const columns = [
     {
       title: "Serial No.",
@@ -158,58 +214,7 @@ function App() {
       },
     },
   ];
-
-  function clearAllTasks() {
-    // modal button clear all
-    setTodoList([]);
-    localStorage.clear("todoList");
-    setIsClearModal(false);
-  }
-
-  function editTask(e) {
-    // modal button edit
-    setIsEditModal(false);
-    console.log(e.id);
-    setTodoList((prev) => {
-      return prev.map((item) => {
-        if (
-          (item.title.toLowerCase() !== e.title.toLowerCase() ||
-            item.description.toLowerCase() !== e.title.toLowerCase()) &&
-          item.id === e.id
-        ) {
-          return { ...item, ...editing };
-        } else {
-          return { ...item };
-        }
-      });
-    });
-
-    localStorage.setItem(
-      "todoList",
-      JSON.stringify(
-        todoList.map((item) => {
-          if (
-            (item.title.toLowerCase() !== e.title.toLowerCase() ||
-              item.description.toLowerCase() !== e.title.toLowerCase()) &&
-            item.id === e.id
-          ) {
-            return { ...item, ...editing };
-          } else {
-            return { ...item };
-          }
-        })
-      )
-    );
-  }
-
-  function handleEditChange(e) {
-    const { name, value } = e.target;
-    setEditing((prev) => ({
-      ...prev,
-      status: "Open",
-      [name]: value,
-    }));
-  }
+  /* TABLE COLUMNS END */
 
   return (
     <div className="App">
