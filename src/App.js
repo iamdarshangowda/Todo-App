@@ -1,6 +1,6 @@
 import "./App.css";
 import "antd/dist/antd.css";
-import { Table, Modal, Input, Button, Space } from "antd";
+import { Table, Modal, Input } from "antd";
 import { useRef, useState } from "react";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -65,6 +65,10 @@ function App() {
       okType: "danger",
       onOk: () => {
         setTodoList((prev) => prev.filter((item) => item.id !== record.id));
+        localStorage.setItem(
+          "todoList",
+          JSON.stringify(todoList.filter((item) => item.id !== record.id))
+        );
       },
     });
   }
@@ -179,6 +183,23 @@ function App() {
         }
       });
     });
+
+    localStorage.setItem(
+      "todoList",
+      JSON.stringify(
+        todoList.map((item) => {
+          if (
+            (item.title.toLowerCase() !== e.title.toLowerCase() ||
+              item.description.toLowerCase() !== e.title.toLowerCase()) &&
+            item.id === e.id
+          ) {
+            return { ...item, ...editing };
+          } else {
+            return { ...item };
+          }
+        })
+      )
+    );
   }
 
   function handleEditChange(e) {
